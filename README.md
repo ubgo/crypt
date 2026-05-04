@@ -19,20 +19,27 @@ That's the whole API for the most common case. Need more? Read on.
 
 ## Is this for you?
 
-`crypt` is built for Go applications that need a small set of cryptography primitives done well, with safe defaults, no foot-guns, and optionally a Node.js sibling that produces byte-identical output. **Reach for it when you're about to write any of the following:**
+`crypt` is built for Go applications that need a curated set of cryptography primitives done well, with safe defaults, no foot-guns, and optionally a Node.js sibling that produces byte-identical output. **Reach for it when you're about to write any of the following:**
 
-- I need to encrypt a database column at rest (API client secrets, PII, encryption keys, webhook secrets) and decrypt it back later.
-- I need to sign outgoing webhooks with HMAC and verify incoming ones (Stripe, GitHub, etc. style).
-- I need to hash user passwords correctly with modern parameters (argon2id) — and not get the PHC string wrong.
-- I need to generate cryptographically-random API keys, magic-link tokens, CSRF tokens, session IDs.
-- I need a stateless session token (a JWT-like pattern, smaller, no algorithm confusion).
-- I need a Node.js service to decrypt data my Go service encrypted (or vice versa).
-- I need to compare an API key in constant time, without leaking timing.
-- I need to migrate AES-CBC ciphertext from a previous system to authenticated AES-GCM.
+- Encrypt a database column at rest (API client secrets, PII, encryption keys, webhook secrets) and decrypt it back later.
+- Sign outgoing webhooks with HMAC (or Ed25519 public-key) and verify incoming ones — Stripe-style with timestamp tolerance, etc.
+- Hash user passwords correctly with modern parameters (argon2id, or bcrypt for compatibility).
+- Generate cryptographically-random API keys, magic-link tokens, CSRF tokens, session IDs.
+- Issue stateless time-locked tokens (password reset, email verify, magic login) with embedded expiry.
+- Decrypt in Node.js what a Go service encrypted (or vice versa) — same wire format on both sides.
+- Compare an API key in constant time without leaking timing.
+- Interoperate with an existing AES-CBC system, or read ciphertext you already wrote in CBC.
+- Encrypt large files in chunks (`SealStream` / `OpenStream`) with per-chunk authentication and truncation detection.
+- Derive per-tenant or per-purpose sub-keys from a single master with HKDF.
+- Rotate keys gracefully — `KeyRing` with embedded kid; old data still readable, new writes use the active key.
+- Use ChaCha20-Poly1305 instead of AES-GCM (no AES-NI hardware, or defense-in-depth diversity).
+- Encrypt to a recipient's public key — X25519 + ChaCha20-Poly1305 (sealed-box), age-style.
+- Sign with Ed25519 — public-key signatures where verifiers don't share the signing key.
+- Envelope encryption with a KMS — per-row DEK wrapped under a KMS-managed KEK.
 
 If any of those are on your plate, this is the package.
 
-**Not for you if:** you need TLS, PKI, X.509, JWT/JOSE, certificate management, KMS adapters (v2), browser/WebCrypto, or post-quantum crypto. Use the std library or a specialized package for those.
+**Not for you if:** you need TLS, PKI, X.509, JWT/JOSE, certificate management, browser/WebCrypto, or post-quantum crypto. Use the std library or a specialized package for those.
 
 ---
 
@@ -122,7 +129,7 @@ The last one is not theoretical: a hand-rolled wrapper in a Node.js codebase shi
 
 **Constant-time compare** — `ConstantTimeEqual`. Wraps `crypto/subtle`.
 
-**Legacy AES-CBC support** — `EncryptCBC`, `DecryptCBC`, plus a `legacy.OpenAuto` migration helper that detects format and dispatches. For reading existing v0.x data only — new code uses AEAD.
+**AES-CBC** — `EncryptCBC`, `DecryptCBC` (16/24/32-byte keys for AES-128/192/256). First-class peer of AES-GCM — use it when interop with an existing AES-CBC system is required (PHP/Java/Python), or when reading ciphertext your application already wrote in this format. CBC has no built-in authentication; layer HMAC on top (encrypt-then-MAC) or use `Seal/Open` if you need tamper detection. A `legacy.OpenAuto` helper auto-detects AEAD vs CBC for migration scripts.
 
 **Cross-language wire format** — every AEAD and HMAC output is byte-identical to the TypeScript counterpart, validated by `testdata/vectors.json` consumed by both repos' tests.
 
@@ -156,11 +163,57 @@ func ConstantTimeEqual(a, b []byte) bool
 func HashPassword(plaintext string) (string, error)
 func VerifyPassword(plaintext, hash string) (bool, error)
 
-// Legacy CBC (Deprecated — for migration only)
+// AES-CBC (16/24/32-byte keys; no built-in auth — pair with HMAC if needed)
 func EncryptCBC(key []byte, plaintext []byte) (string, error)
 func DecryptCBC(key []byte, ciphertext string) ([]byte, error)
 import "github.com/ubgo/crypt/legacy"
 func legacy.OpenAuto(key []byte, ciphertext string, aad []byte) ([]byte, error)
+
+// ChaCha20-Poly1305 (alternative AEAD; wire version 0x02)
+func SealChaCha20(key, plaintext, aad []byte) (string, error)
+func OpenChaCha20(key []byte, ciphertext string, aad []byte) ([]byte, error)
+
+// Bcrypt password hashing (compatibility with bcrypt-using systems)
+func HashPasswordBcrypt(plaintext string, cost int) (string, error)
+func VerifyPasswordBcrypt(plaintext, hash string) (bool, error)
+
+// HKDF key derivation
+func DeriveKey(masterKey, salt, info []byte, length int) ([]byte, error)
+
+// KeyRing for rotation (wire version 0x03 with embedded kid)
+type KeyRing struct { /* ... */ }
+func NewKeyRing(activeKid string, activeKey []byte) (*KeyRing, error)
+func (r *KeyRing) Add(kid string, key []byte) error
+func (r *KeyRing) Remove(kid string) error
+func (r *KeyRing) SetActive(kid string) error
+func (r *KeyRing) ActiveKid() string
+func (r *KeyRing) Seal(plaintext, aad []byte) (string, error)
+func (r *KeyRing) Open(ciphertext string, aad []byte) ([]byte, error)
+
+// Time-locked tokens (embedded expiry; ErrExpired sentinel)
+func IssueToken(key, payload []byte, ttl time.Duration, aad []byte) (string, error)
+func VerifyToken(key []byte, token string, aad []byte) ([]byte, error)
+
+// Streaming AEAD (chunked file encryption with truncation detection)
+func SealStream(key []byte, r io.Reader, w io.Writer, chunkSize int) error
+func OpenStream(key []byte, r io.Reader, w io.Writer) error
+
+// Ed25519 public-key signatures
+func GenerateEd25519() (publicKey ed25519.PublicKey, privateKey ed25519.PrivateKey, err error)
+func SignEd25519(priv ed25519.PrivateKey, data []byte) ([]byte, error)
+func VerifyEd25519(pub ed25519.PublicKey, data, sig []byte) (bool, error)
+
+// X25519 + ChaCha20-Poly1305 sealed-box (asymmetric encrypt; wire version 0x05)
+func GenerateKeyPair() (publicKey, privateKey []byte, err error)
+func SealAsymmetric(recipientPublicKey, plaintext []byte) (string, error)
+func OpenAsymmetric(recipientPrivateKey []byte, ciphertext string) ([]byte, error)
+
+// Envelope encryption (KMS-wrapped DEK; wire version 0x06)
+type KMS interface { /* ... */ }
+type StaticKMS struct { /* ... */ }       // in-memory adapter for tests/dev
+func NewStaticKMS() *StaticKMS
+type EnvelopeSealer struct { /* ... */ }
+func NewEnvelopeSealer(kms KMS, keyID string) *EnvelopeSealer
 ```
 
 Full reference at [pkg.go.dev](https://pkg.go.dev/github.com/ubgo/crypt).

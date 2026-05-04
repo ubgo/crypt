@@ -79,9 +79,9 @@ This vector is in [`testdata/vectors.json`](./testdata/vectors.json) under `aead
 
 ---
 
-## Legacy CBC format — backward compatibility
+## AES-CBC format
 
-Used by `EncryptCBC`, `DecryptCBC`, and the deprecated v0.x `EncryptWithKey` / `DecryptWithKey` / `Cipher.Encrypt` / `Cipher.Decrypt`.
+Used by `EncryptCBC`, `DecryptCBC`, and the v0.x string-typed wrappers (`EncryptWithKey` / `DecryptWithKey` / `Cipher.Encrypt` / `Cipher.Decrypt`, which delegate to the byte-typed forms).
 
 ### Encoding
 

@@ -1,8 +1,6 @@
-# Migration Guide — v0.x AES-CBC → v1.x AES-GCM
+# Migration Guide — AES-CBC → AES-GCM (when you want it)
 
-This document describes how to migrate existing AES-CBC ciphertext (produced by `EncryptWithKey`, `Cipher.Encrypt`, or `EncryptCBC` in v0.x) to authenticated AES-GCM (produced by `Seal` / `Sealer.Seal` in v1+).
-
-**Migration is optional.** If you have data in production encrypted with the v0.x CBC functions, that data continues to work — `DecryptCBC` reads it unchanged. New v1.x AEAD functions coexist with the legacy ones.
+This document describes how to migrate existing AES-CBC ciphertext to authenticated AES-GCM. **Migration is optional.** AES-CBC and AES-GCM are first-class peers in this package — `DecryptCBC` and `Open` both work indefinitely. Migrate only when authenticated encryption is genuinely required for your threat model (or for compliance), or as a side effect of rewriting nearby code. If your CBC ciphertexts are stable and you don't have a specific reason to switch, leaving them alone is correct.
 
 This document tells you when to migrate, how to do it safely, and how to roll back if something goes wrong.
 
@@ -27,7 +25,7 @@ You should migrate if **any** of these apply:
 - A new feature requires per-row AAD binding (e.g., per-tenant data isolation).
 - You are upgrading to v1.x and want a clean break with no legacy reads.
 
-You should **not** migrate if none of the above apply. Stable production data using `DecryptCBC` is fine indefinitely. The v0.x CBC functions are marked `Deprecated` to discourage *new* CBC writes, but reading existing CBC data is not a problem.
+You should **not** migrate if none of the above apply. Stable production data using `EncryptCBC`/`DecryptCBC` is fine indefinitely. The byte-typed CBC API is a first-class peer of AES-GCM, not deprecated — only the older string-typed wrappers (`Cipher`, `New`, `EncryptWithKey`, `DecryptWithKey`) are marked `Deprecated`, and that's about preferring the byte API, not avoiding CBC.
 
 ## What changes for callers
 

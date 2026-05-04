@@ -9,22 +9,50 @@ import (
 	"io"
 )
 
-// This file holds the legacy AES-CBC implementation. CBC mode does not
-// authenticate ciphertext, so it cannot detect tampering. New code
-// should use Seal/Open (AES-256-GCM) instead. The CBC functions are
-// retained for backward compatibility with data already encrypted in
-// the wild.
+// This file holds the AES-CBC implementation. CBC is offered as a
+// peer to AES-GCM (Seal/Open) — both are first-class. CBC has no
+// built-in message authentication, so callers who care about tamper
+// detection should either layer HMAC on top (encrypt-then-MAC) or
+// use Seal/Open (which build in authentication).
 //
 // Wire format: hex(IV[16] || PKCS7-padded-ciphertext)
 //
 // Key sizes accepted: 16, 24, or 32 bytes (AES-128/192/256).
+//
+// Use cases for CBC over AEAD:
+//   - Interop with existing systems (PHP openssl_encrypt, Java
+//     javax.crypto, older Python/Ruby) that use AES-CBC.
+//   - Reading ciphertext your application already wrote with this
+//     format.
+//   - Compliance requirements that mandate a specific algorithm.
+//
+// The v0.x type-based API (Cipher, New) and string-based wrappers
+// (EncryptWithKey, DecryptWithKey) are kept here, both wrapping
+// EncryptCBC/DecryptCBC. They remain marked Deprecated as they are
+// superseded by the byte-typed forms.
 
 // EncryptCBC PKCS#7-pads the plaintext, AES-CBC encrypts it with a
 // fresh random IV from crypto/rand, and returns hex(IV || ciphertext).
 //
-// Deprecated: AES-CBC has no message authentication. New code should
-// call Seal, which uses AES-256-GCM. EncryptCBC is retained for
-// backward compatibility with data already encrypted in this format.
+// Trade-offs vs Seal (AES-256-GCM):
+//   - CBC has no message authentication. A tampered ciphertext is
+//     either rejected by PKCS#7 unpadding (~255/256 of the time) or
+//     produces silent garbage plaintext (~1/256). If you care about
+//     tamper detection, layer HMAC on top (encrypt-then-MAC) or use
+//     Seal which builds in authentication.
+//   - CBC accepts 16/24/32-byte keys (AES-128/192/256). Seal is
+//     AES-256-only.
+//   - Output is hex; Seal output is base64url-no-pad. CBC ciphertext
+//     is typically larger because hex doubles every byte.
+//
+// Use it when:
+//   - Interoperating with an existing system that uses AES-CBC
+//     (PHP openssl_encrypt, Java javax.crypto with CBC, older
+//     Python/Ruby code, etc.).
+//   - Reading ciphertext your application already wrote with this
+//     format.
+//   - A specific compliance or library-compat constraint requires
+//     AES-CBC.
 func EncryptCBC(key, plaintext []byte) (string, error) {
 	if !validCBCKeyLen(len(key)) {
 		return "", fmt.Errorf("%w: CBC requires 16, 24, or 32 bytes; got %d", ErrInvalidKey, len(key))
@@ -55,10 +83,9 @@ func EncryptCBC(key, plaintext []byte) (string, error) {
 // from the first AES block, AES-CBC decrypts the rest, and removes
 // PKCS#7 padding.
 //
-// Deprecated: AES-CBC has no message authentication. A tampered
-// ciphertext that produces invalid padding returns ErrInvalidPadding,
-// but a tamper that happens to land on valid padding produces silent
-// garbage plaintext. New code should call Open instead.
+// See EncryptCBC for trade-offs vs the authenticated AEAD path
+// (Open/Seal). If you control both ends of the wire and need
+// authentication, prefer Open.
 func DecryptCBC(key []byte, ciphertext string) ([]byte, error) {
 	if !validCBCKeyLen(len(key)) {
 		return nil, fmt.Errorf("%w: CBC requires 16, 24, or 32 bytes; got %d", ErrInvalidKey, len(key))

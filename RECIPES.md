@@ -100,19 +100,30 @@ func main() { b := make([]byte, 32); rand.Read(b); fmt.Println(hex.EncodeToStrin
 EOF
 ```
 
-### Derive per-tenant key from a master
+### Derive per-tenant key from a master (built-in HKDF — v1.1)
 
 ```go
-// Requires golang.org/x/crypto/hkdf
-import "golang.org/x/crypto/hkdf"
-
-h := hkdf.New(sha256.New, masterKey, nil, []byte("tenant:"+tenantID))
-tenantKey := make([]byte, crypt.AEADKeySize)
-io.ReadFull(h, tenantKey)
+tenantKey, _ := crypt.DeriveKey(masterKey, nil, []byte("tenant:"+tenantID), crypt.AEADKeySize)
 sealer, _ := crypt.NewSealer(tenantKey)
 ```
 
-### Rotate keys with a fallback reader
+The built-in `DeriveKey` wraps HKDF-SHA256 — same algorithm, simpler call site.
+
+### Rotate keys with the built-in KeyRing (v1.1)
+
+```go
+ring, _ := crypt.NewKeyRing("2025", oldKey)
+ring.Add("2026", newKey)
+ring.SetActive("2026")
+
+ct, _ := ring.Seal(payload, nil)        // tagged "2026"
+pt, _ := ring.Open(oldCt, nil)          // dispatches by kid; reads "2025" key
+ring.Remove("2025")                     // after all data has rotated
+```
+
+### (Older alternative) Manual multi-key reader
+
+If you'd rather not embed kid bytes in the ciphertext (older v1.0 style):
 
 ```go
 type MultiKeyReader struct{ keys [][]byte }
@@ -493,3 +504,107 @@ if buf, _ := base64.RawURLEncoding.DecodeString(ct); len(buf) > 0 && buf[0] != c
 | Use the same key in dev and prod | Per-environment keys |
 | Accept arbitrary AEAD inputs without bounds check | Use `Open` only on trusted inputs |
 | Reuse a nonce manually | Use `Seal` (it generates a random nonce) |
+
+---
+
+## v1.1 features
+
+### ChaCha20-Poly1305 alternative (no AES-NI hardware)
+
+```go
+ct, _ := crypt.SealChaCha20(key, plaintext, aad)
+pt, _ := crypt.OpenChaCha20(key, ct, aad)
+```
+
+Wire format version 0x02. Cross-language with `@ubgo/crypt`'s `sealChaCha20` / `openChaCha20`.
+
+### Compatibility migration from bcrypt
+
+```go
+// On login: bcrypt verify, then re-hash with argon2id.
+if strings.HasPrefix(user.PasswordHash, "$2") {
+    ok, _ := crypt.VerifyPasswordBcrypt(provided, user.PasswordHash)
+    if !ok { return errInvalidCredentials }
+    newHash, _ := crypt.HashPassword(provided)
+    db.Update(user.ID, newHash)
+} else {
+    ok, _ := crypt.VerifyPassword(provided, user.PasswordHash)
+    if !ok { return errInvalidCredentials }
+}
+```
+
+See [`examples/bcrypt_migration`](./examples/bcrypt_migration).
+
+---
+
+## v1.2 features
+
+### Time-locked tokens (built-in)
+
+```go
+// Issue a 1-hour password-reset link.
+tok, _ := crypt.IssueToken(key, []byte("usr_42"), time.Hour, []byte("pwreset-v1"))
+
+// Verify on click. Returns ErrExpired if past TTL.
+payload, err := crypt.VerifyToken(key, tok, []byte("pwreset-v1"))
+if errors.Is(err, crypt.ErrExpired) {
+    return "link expired"
+}
+```
+
+The `aad` parameter binds the token to a specific purpose; using a "pwreset-v1" token at an "email-verify-v1" endpoint fails. See [`examples/time_locked_token`](./examples/time_locked_token).
+
+### Streaming AEAD for large files
+
+```go
+in, _ := os.Open("big.dat")
+out, _ := os.Create("big.enc")
+crypt.SealStream(key, in, out, crypt.DefaultStreamChunkSize)
+
+dec, _ := os.Create("big.out")
+crypt.OpenStream(key, encReader, dec)
+```
+
+Each chunk is independently authenticated; truncation surfaces as `ErrTruncated`. See [`examples/streaming_file`](./examples/streaming_file).
+
+---
+
+## v2 features
+
+### Public-key signatures (Ed25519)
+
+```go
+pub, priv, _ := crypt.GenerateEd25519()
+sig, _ := crypt.SignEd25519(priv, body)
+
+// Anyone with `pub` can verify; only holder of `priv` can sign.
+ok, _ := crypt.VerifyEd25519(pub, body, sig)
+```
+
+Compare with HMAC `Sign/Verify` (shared secret). See [`examples/ed25519_sign`](./examples/ed25519_sign).
+
+### Asymmetric encryption (sealed-box)
+
+```go
+recipientPub, recipientPriv, _ := crypt.GenerateKeyPair()
+
+// Sender encrypts with public key; only recipient can decrypt.
+ct, _ := crypt.SealAsymmetric(recipientPub, plaintext)
+pt, _ := crypt.OpenAsymmetric(recipientPriv, ct)
+```
+
+Anonymous-sender semantics. To authenticate the sender, sign with Ed25519 first. See [`examples/asymmetric_encrypt`](./examples/asymmetric_encrypt).
+
+### Envelope encryption with KMS
+
+```go
+// In production: real adapter for AWS KMS, GCP KMS, Vault, etc.
+kms := crypt.NewStaticKMS()
+kms.AddKey("kek-prod-2026", kek)
+
+sealer := crypt.NewEnvelopeSealer(kms, "kek-prod-2026")
+ct, _ := sealer.Seal(ctx, plaintext, []byte("table:transactions"))
+pt, _ := sealer.Open(ctx, ct, []byte("table:transactions"))
+```
+
+Each Seal generates a fresh DEK from the KMS, encrypts the plaintext under that DEK, and embeds the wrapped DEK in the output. Compromise of the database alone doesn't reveal data — attacker also needs KMS access. See [`examples/envelope_encryption`](./examples/envelope_encryption).

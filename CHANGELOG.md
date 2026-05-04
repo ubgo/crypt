@@ -31,7 +31,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Argon2id password hashing**: `HashPassword`, `VerifyPassword` with PHC-format output.
 - **HMAC signing**: `Sign` (HMAC-SHA256), `Verify` (constant-time), `ConstantTimeEqual` wrapper.
 - **Random helpers**: `RandomBytes`, `RandomToken` (URL-safe base64 no-pad), `RandomHex`.
-- **Legacy AES-CBC** support for v0.x backward compatibility. Marked `Deprecated`.
+- **AES-CBC** as a first-class peer of AES-GCM — `EncryptCBC` / `DecryptCBC` for interop with existing CBC systems (PHP/Java/Python) or reading ciphertext your application already wrote in this format. No built-in authentication; pair with HMAC if needed.
 - **Migration helper** at `legacy.OpenAuto` for transitional reads across formats.
 - **Cross-language test vectors** at `testdata/vectors.json` shared with the TypeScript counterpart at `@ubgo/crypt`.
 - **Sentinel errors**: `ErrInvalidKey`, `ErrTampered`, `ErrUnsupportedVersion`, `ErrInvalidCiphertext`, `ErrInvalidPasswordHash`, `ErrTruncated`, `ErrExpired`, etc.
@@ -40,9 +40,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Deprecated
 
-- `EncryptCBC` / `DecryptCBC` — AES-CBC has no message authentication. Use `Seal` / `Open` for new code. Retained for backward compatibility with existing v0.x data.
-- `EncryptWithKey` / `DecryptWithKey` — same Deprecated status.
-- `Cipher`, `New`, `Cipher.Encrypt`, `Cipher.Decrypt` — v0.x type-based CBC API. Same Deprecated status.
-- `HashPasswordBcrypt` / `VerifyPasswordBcrypt` — only for migrating from bcrypt-using systems.
+- `Cipher`, `New`, `Cipher.Encrypt`, `Cipher.Decrypt` — v0.x type-based string-input wrappers. Use the byte-typed `EncryptCBC` / `DecryptCBC` directly.
+- `EncryptWithKey` / `DecryptWithKey` — same v0.x string-typed wrappers. Use byte-typed forms.
+
+(Note: `EncryptCBC` and `DecryptCBC` themselves are NOT deprecated — they are first-class peers of `Seal` / `Open`. Only the older string-typed wrappers are.)
 
 [Unreleased]: https://github.com/ubgo/crypt

@@ -8,6 +8,14 @@ Hand-rolled wrappers around `crypto/aes`, `crypto/cipher`, `crypto/hmac`, `crypt
 
 You can. But you'll likely get the small details wrong: nonce reuse, no version tag, manual base64, no AAD, no const-time comparison helper. The whole point of `crypt` is to provide one well-thought-out shape so callers don't have to think about those details.
 
+## Can I use AES-CBC, or is it forbidden?
+
+Use it freely. `EncryptCBC` and `DecryptCBC` are first-class peers of `Seal` and `Open`. Pick CBC when you need to interoperate with an existing system that uses AES-CBC (PHP `openssl_encrypt`, Java `javax.crypto`, older Python/Ruby code), when you have specific compliance constraints, or when reading ciphertext your application already wrote in this format.
+
+The trade-off vs AES-GCM: CBC has no built-in message authentication, so a tampered ciphertext either fails PKCS#7 unpadding (~99.6% of the time) or produces silent garbage plaintext (~0.4%). If you care about tamper detection on CBC output, layer HMAC on top (encrypt-then-MAC pattern). Or use `Seal/Open` which builds in authentication.
+
+The v0.x string-typed wrappers (`Cipher`, `New`, `EncryptWithKey`, `DecryptWithKey`) ARE marked `Deprecated` — that's about preferring the byte-typed API, not avoiding CBC. The byte-typed `EncryptCBC`/`DecryptCBC` are not deprecated.
+
 ## Why AES-256-GCM, not ChaCha20-Poly1305?
 
 GCM is hardware-accelerated on every modern x86_64 server (AES-NI) and ARMv8 mobile CPU. It's the NIST standard for authenticated encryption. Both Go and Node std libs implement it identically, enabling our cross-language wire format.
@@ -63,7 +71,7 @@ Each call creates: the `cipher.Block`, the `cipher.AEAD`, the nonce buffer, the 
 
 ## Can I use a 16-byte (AES-128) key for `Seal`?
 
-No. `Seal` requires exactly 32 bytes. If you have only 16 bytes of key material, derive a 32-byte key with HKDF (see `examples/tenant_keys`). 16-byte keys are accepted by the legacy `EncryptCBC` for backward compatibility with v0 data, but new code should use 32 bytes uniformly.
+No. `Seal` requires exactly 32 bytes (AES-256-GCM). If you have only 16 bytes of key material, derive 32 bytes with `crypt.DeriveKey` (HKDF). 16-byte keys ARE accepted by `EncryptCBC` for AES-128 — use that path if you specifically need AES-128 for interop with another system.
 
 ## What's the difference between AAD and AAD-bound IDs in the plaintext?
 

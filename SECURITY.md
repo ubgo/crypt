@@ -40,7 +40,7 @@ Binding ciphertext to a context (user ID, tenant ID, message type) using AAD pre
 ### Key length validation
 
 - AEAD operations require exactly 32 bytes. Other lengths fail with `ErrInvalidKey` rather than silently downgrading.
-- Legacy CBC accepts 16/24/32 bytes (AES-128/192/256). New code should not encounter this.
+- AES-CBC accepts 16/24/32 bytes (AES-128/192/256). Choose the size that matches the system you're interoperating with; AES-256 is the conservative default for new CBC use.
 
 ### Modern algorithms
 

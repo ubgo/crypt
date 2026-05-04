@@ -1,0 +1,51 @@
+# Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+bin/
+
+# Test + coverage outputs
+*.test
+*.out
+cover.out
+cover.html
+coverage.*
+
+# Editor / IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Go workspace local files
+go.work.sum
+
+# Build artifacts
+dist/
+build/
+
+# Compiled example binaries (each examples/<name>/<name> from `go build .`)
+examples/*/api_key_check
+examples/*/audit_log_chain
+examples/*/csrf_token
+examples/*/cross_lang_go
+examples/*/encrypted_cookie
+examples/*/encrypted_file
+examples/*/encrypt_field
+examples/*/hash_password
+examples/*/key_rotation
+examples/*/magic_link
+examples/*/migrate_cbc_to_gcm
+examples/*/random_token
+examples/*/seal_with_aad
+examples/*/sealer
+examples/*/session_token
+examples/*/sign_webhook
+examples/*/tenant_keys
+examples/*/webhook_with_timestamp

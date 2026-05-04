@@ -1,0 +1,95 @@
+{
+  "version": 1,
+  "notes": "Cross-language test vectors for github.com/ubgo/crypt and @ubgo/crypt. Both Go and TS test suites consume this file. Regenerate with: go run ./cmd/gen-vectors \u003e testdata/vectors.json",
+  "aead": [
+    {
+      "name": "all-zero key, all-zero nonce, empty plaintext, no AAD",
+      "key_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+      "nonce_hex": "000000000000000000000000",
+      "aad_hex": "",
+      "plaintext_hex": "",
+      "expected_b64url": "AQAAAAAAAAAAAAAAAFMPivvHRTa5qWO08cTLc4s"
+    },
+    {
+      "name": "all-zero key, all-zero nonce, ASCII plaintext, no AAD",
+      "key_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+      "nonce_hex": "000000000000000000000000",
+      "aad_hex": "",
+      "plaintext_hex": "68656c6c6f2c20776f726c64",
+      "expected_b64url": "AQAAAAAAAAAAAAAAAKbCLFEiTEsZaDyptyVyvm9D_ANLvLHf91EaQ6I"
+    },
+    {
+      "name": "all-zero key, all-zero nonce, ASCII plaintext, ASCII AAD",
+      "key_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+      "nonce_hex": "000000000000000000000000",
+      "aad_hex": "757365723a3432",
+      "plaintext_hex": "68656c6c6f2c20776f726c64",
+      "expected_b64url": "AQAAAAAAAAAAAAAAAKbCLFEiTEsZaDypt1i1i-WvUsUgHzjEz9xiQJ0"
+    },
+    {
+      "name": "patterned key, patterned nonce, longer plaintext",
+      "key_hex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "nonce_hex": "111213141516171819101a1b",
+      "aad_hex": "636f6e746578742d62696e64696e672d737472696e67",
+      "plaintext_hex": "74686520717569636b2062726f776e20666f78206a756d7073206f76657220746865206c617a7920646f672030313233343536373839",
+      "expected_b64url": "ARESExQVFhcYGRAaG02zELqvtgMZdTLRnB920A89R5Gy_tBdQYshiZwMIaENd-PjpDYdxtOqaf2jSXAuYIUS0VTgJ0svKV4faIdv8mOPpGNpi_I"
+    },
+    {
+      "name": "binary plaintext, no AAD",
+      "key_hex": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "nonce_hex": "fedcba9876543210fedcba98",
+      "aad_hex": "",
+      "plaintext_hex": "000102030405060708090a0b0c0d0e0ffefcfdf8f0e0d0c0b0a0908070605040",
+      "expected_b64url": "Af7cuph2VDIQ_ty6mNKuSaE7UmVDRZ8uHWlPw_Jr_vhu4ppGNcxtl4Yiupwnt_SPD7MeTma-g5qXCBV9kA"
+    }
+  ],
+  "hmac": [
+    {
+      "name": "empty data",
+      "key_hex": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "data_hex": "",
+      "expected_hex": "63210aee265762634fa3db8c1aa920dcd07d31ec297309580394a21412f83372"
+    },
+    {
+      "name": "short ASCII data",
+      "key_hex": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "data_hex": "68656c6c6f",
+      "expected_hex": "b6e8136a040e71266e360e23c7d48eac29362d4cff102207565d5b3072f1453b"
+    },
+    {
+      "name": "long ASCII data",
+      "key_hex": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "data_hex": "74686520717569636b2062726f776e20666f78206a756d7073206f76657220746865206c617a7920646f67",
+      "expected_hex": "57d075d661dfc62b3075c1ecd0e8d95a47c552d52ba14b72e8140588dc416710"
+    },
+    {
+      "name": "binary data",
+      "key_hex": "fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210",
+      "data_hex": "000102fffefd",
+      "expected_hex": "4e5b5f87793ae112c40262b1bcbdbf058f53af55e4d5f51c7277d289e7a7d06d"
+    }
+  ],
+  "cbc_legacy": [
+    {
+      "name": "AES-256-CBC, short plaintext",
+      "key_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+      "iv_hex": "11111111111111111111111111111111",
+      "plaintext_hex": "68656c6c6f",
+      "expected_hex": "11111111111111111111111111111111de7609295c6f95e6796b12f25cfa8550"
+    },
+    {
+      "name": "AES-256-CBC, exact-block plaintext",
+      "key_hex": "0000000000000000000000000000000000000000000000000000000000000000",
+      "iv_hex": "22222222222222222222222222222222",
+      "plaintext_hex": "30313233343536373839616263646566",
+      "expected_hex": "2222222222222222222222222222222278f53377b0fdaa51e1fda1afa4bbf3c79ece5a5ddd68b880c2c46049a91cbc4e"
+    },
+    {
+      "name": "AES-256-CBC, longer plaintext",
+      "key_hex": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "iv_hex": "fedcba9876543210fedcba9876543210",
+      "plaintext_hex": "74686520717569636b2062726f776e20666f78206a756d7073206f76657220746865206c617a7920646f67",
+      "expected_hex": "fedcba9876543210fedcba9876543210955f52e9c049484c36615c5482343377ddbfb3c8816c78a04f806fb543ac649a90463124bbd7a5ac5b4a6f02cf1334dc"
+    }
+  ]
+}

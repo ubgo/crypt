@@ -1,0 +1,40 @@
+version: "2"
+
+run:
+  timeout: 5m
+  tests: true
+
+linters:
+  default: standard
+  enable:
+    - errcheck
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - revive
+    - misspell
+    - unconvert
+    - gocritic
+  settings:
+    staticcheck:
+      # SA1019 flags use of deprecated symbols. We have intentional
+      # uses of the deprecated CBC API inside legacy/ (the migration
+      # helper subpackage) and in tests for those deprecated
+      # functions. Disable globally; rely on the Deprecated doc
+      # comment plus code review.
+      checks:
+        - "all"
+        - "-SA1019"
+  exclusions:
+    # Examples and the vector-generator tool prioritize readability and
+    # demo clarity over strict lint compliance — they intentionally
+    # ignore some errors (Body.Close, fmt.Fprintln, log.Fatal-with-defer)
+    # so the example code reads like prose.
+    paths:
+      - "examples"
+      - "cmd/gen-vectors"
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0

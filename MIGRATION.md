@@ -306,11 +306,11 @@ If the key was rotated as part of migration:
 
 ## Cross-language migration (Node.js sibling)
 
-If you have a Node.js service that reads/writes the same encrypted data via `aitoolscrypt.ts` or `@ubgo/crypt`:
+If you have a Node.js service that reads/writes the same encrypted data via `aitoolscrypt.ts` or the new crypt-ts:
 
 ### Step 1 — Upgrade Node side first
 
-The current `aitoolscrypt.ts` has bugs (see [PLAN.md](https://github.com/ubgo/crypt/blob/main/docs/internal/PLAN.md)) that silently corrupt data > 16 bytes. Replace with `@ubgo/crypt`:
+The current `aitoolscrypt.ts` has bugs (see [PLAN.md](https://github.com/ubgo/crypt/blob/main/docs/internal/PLAN.md)) that silently corrupt data > 16 bytes. Replace with crypt-ts:
 
 ```ts
 // Before (buggy)

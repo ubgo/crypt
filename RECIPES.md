@@ -516,7 +516,7 @@ ct, _ := crypt.SealChaCha20(key, plaintext, aad)
 pt, _ := crypt.OpenChaCha20(key, ct, aad)
 ```
 
-Wire format version 0x02. Cross-language with `@ubgo/crypt`'s `sealChaCha20` / `openChaCha20`.
+Wire format version 0x02. Cross-language with crypt-ts.s `sealChaCha20` / `openChaCha20`.
 
 ### Compatibility migration from bcrypt
 

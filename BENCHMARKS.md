@@ -52,7 +52,7 @@ BenchmarkEncryptCBC_1KB-10             336,502 ops/sec   3547 ns/op   289 MB/s  
 
 ## Comparison vs TypeScript counterpart
 
-The Node/V8 sibling at `@ubgo/crypt` is roughly 3-5x slower per op due to JS overhead, but still in the same order of magnitude. Both implementations call the same hardware AES-NI under the hood. See `BENCHMARKS.md` in the [TS repo](https://github.com/ubgo/crypt-ts) for matching numbers.
+The Node/V8 sibling crypt-ts is roughly 3-5x slower per op due to JS overhead, but still in the same order of magnitude. Both implementations call the same hardware AES-NI under the hood. See `BENCHMARKS.md` in the [TS repo](https://github.com/ubgo/crypt-ts) for matching numbers.
 
 ## Allocations
 

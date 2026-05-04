@@ -333,7 +333,7 @@ Treat any `import "github.com/ubgo/crypt"` line as a smell. Production reads sho
 
 ## Cross-language interop with Node.js
 
-The TypeScript package [`@ubgo/crypt`](https://github.com/ubgo/crypt-ts) produces byte-for-byte identical AEAD ciphertexts. Common patterns:
+The TypeScript package [`crypt-ts`](https://github.com/ubgo/crypt-ts) produces byte-for-byte identical AEAD ciphertexts. Common patterns:
 
 ### Go signs, Node verifies
 

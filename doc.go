@@ -1,5 +1,5 @@
 // Package crypt is a cryptography toolkit for Go applications, with
-// a byte-for-byte parity TypeScript counterpart (@ubgo/crypt) so Go
+// a byte-for-byte parity TypeScript counterpart crypt-ts so Go
 // and Node services can encrypt, decrypt, sign, and verify each
 // other's payloads.
 //

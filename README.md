@@ -2,7 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/ubgo/crypt.svg)](https://pkg.go.dev/github.com/ubgo/crypt) [![CI](https://github.com/ubgo/crypt/actions/workflows/test.yml/badge.svg)](https://github.com/ubgo/crypt/actions) [![Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
-> Authenticated encryption, password hashing, webhook signing, and secure random — wrapped around the Go standard library with safe defaults and byte-for-byte interop with the TypeScript counterpart at [`@ubgo/crypt`](https://github.com/ubgo/crypt-ts).
+> Authenticated encryption, password hashing, webhook signing, and secure random — wrapped around the Go standard library with safe defaults and byte-for-byte interop with the TypeScript counterpart [`crypt-ts`](https://github.com/ubgo/crypt-ts).
 
 ```go
 import "github.com/ubgo/crypt"
@@ -236,7 +236,7 @@ Full reference at [pkg.go.dev](https://pkg.go.dev/github.com/ubgo/crypt).
 
 ## TypeScript counterpart
 
-[`@ubgo/crypt`](https://github.com/ubgo/crypt-ts) — same API surface (minus password hashing — server-side only), same wire format, byte-for-byte interoperable.
+[`crypt-ts`](https://github.com/ubgo/crypt-ts) — same API surface (minus password hashing — server-side only), same wire format, byte-for-byte interoperable.
 
 ```ts
 import { seal, open } from "@ubgo/crypt"

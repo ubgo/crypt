@@ -2,7 +2,7 @@
 
 This document is the byte-by-byte specification for the ciphertext formats produced by `github.com/ubgo/crypt`. Implementations in any language can target this spec to achieve byte-identical interop.
 
-The TypeScript counterpart at [`@ubgo/crypt`](https://github.com/ubgo/crypt-ts) is one such implementation. Both consume the same [`testdata/vectors.json`](./testdata/vectors.json) for known-answer correctness testing.
+The TypeScript counterpart at [`crypt-ts`](https://github.com/ubgo/crypt-ts) is one such implementation. Both consume the same [`testdata/vectors.json`](./testdata/vectors.json) for known-answer correctness testing.
 
 ---
 
@@ -261,7 +261,7 @@ To regenerate after a deliberate change:
 go run ./cmd/gen-vectors > testdata/vectors.json
 ```
 
-The Go test suite (`vectors_test.go`) and TS test suite (`@ubgo/crypt`'s `vectors.test.ts`) both consume this file. Any divergence in either implementation fails CI.
+The Go test suite (`vectors_test.go`) and TS test suite (crypt-ts's `vectors.test.ts`) both consume this file. Any divergence in either implementation fails CI.
 
 ---
 

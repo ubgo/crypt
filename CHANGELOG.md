@@ -33,7 +33,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **Random helpers**: `RandomBytes`, `RandomToken` (URL-safe base64 no-pad), `RandomHex`.
 - **AES-CBC** as a first-class peer of AES-GCM — `EncryptCBC` / `DecryptCBC` for interop with existing CBC systems (PHP/Java/Python) or reading ciphertext your application already wrote in this format. No built-in authentication; pair with HMAC if needed.
 - **Migration helper** at `crypt.OpenAuto` for transitional reads across formats.
-- **Cross-language test vectors** at `testdata/vectors.json` shared with the TypeScript counterpart at `@ubgo/crypt`.
+- **Cross-language test vectors** at `testdata/vectors.json` shared with the TypeScript counterpart crypt-ts.
 - **Sentinel errors**: `ErrInvalidKey`, `ErrTampered`, `ErrUnsupportedVersion`, `ErrInvalidCiphertext`, `ErrInvalidPasswordHash`, `ErrTruncated`, `ErrExpired`, etc.
 - **Documentation**: `USAGE.md`, `SECURITY.md`, `WIRE_FORMAT.md`, `MIGRATION.md`, `RECIPES.md`, `FAQ.md`, `BENCHMARKS.md`.
 - **Runnable examples** in `examples/` covering encryption-at-rest, magic links, session tokens, webhook signing, encrypted cookies, CSRF tokens, key rotation, audit log integrity, file encryption, API key checks, per-tenant HKDF, cross-language interop.

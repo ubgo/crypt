@@ -45,8 +45,8 @@ Not with this package directly — it targets Node.js, not browsers. The wire fo
 ## Can I use this on AWS Lambda / Cloudflare Workers / Vercel?
 
 - **AWS Lambda:** yes, runs anywhere Go runs. Cold start adds ~50ms regardless.
-- **Cloudflare Workers:** Go support is experimental. Workers also typically prefer the JS counterpart (`@ubgo/crypt`).
-- **Vercel Edge:** Edge runs JS only — use `@ubgo/crypt`.
+- **Cloudflare Workers:** Go support is experimental. Workers also typically prefer the JS counterpart crypt-ts.
+- **Vercel Edge:** Edge runs JS only — use the JS counterpart crypt-ts.
 - **Vercel Serverless:** yes, runs Go fine.
 
 `HashPassword` (argon2id) uses 64 MiB memory by default. On Lambda with 128 MB allocated this works but is tight; bump Lambda memory or accept slow cold starts.

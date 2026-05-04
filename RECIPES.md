@@ -12,7 +12,7 @@ Short, copy-pasteable patterns for common tasks. For end-to-end runnable demos s
 - [Webhooks](#webhooks)
 - [Files and blobs](#files-and-blobs)
 - [Multi-tenancy](#multi-tenancy)
-- [Migrating legacy data](#migrating-legacy-data)
+- [Migrating between ciphertext formats](#migrating-between-ciphertext-formats)
 - [Operational patterns](#operational-patterns)
 
 ---
@@ -397,15 +397,15 @@ pt, err := sealer.Open(ct, []byte("tenant:"+tenantID))
 
 ---
 
-## Migrating legacy data
+## Migrating between ciphertext formats
 
 ### Read mixed-format ciphertexts
 
 ```go
-import "github.com/ubgo/crypt/legacy"
+import "github.com/ubgo/crypt"
 
 // During rollover window: handles both AEAD and CBC.
-plain, err := legacy.OpenAuto(key, row.Ciphertext, nil)
+plain, err := crypt.OpenAuto(key, row.Ciphertext, nil)
 ```
 
 ### One-shot batch migration
@@ -415,7 +415,7 @@ rows, _ := db.Query(`SELECT id, ciphertext FROM partner_apps`)
 for rows.Next() {
     var id, ct string
     rows.Scan(&id, &ct)
-    plain, err := legacy.OpenAuto(key, ct, nil)
+    plain, err := crypt.OpenAuto(key, ct, nil)
     if err != nil { continue }
     sealed, _ := crypt.Seal(key, plain, nil)
     db.Exec(`UPDATE partner_apps SET ciphertext = $1 WHERE id = $2`, sealed, id)

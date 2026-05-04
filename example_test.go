@@ -192,11 +192,13 @@ func ExampleRandomHex() {
 	// Output: 16
 }
 
-// ExampleEncryptCBC demonstrates the legacy AES-CBC API — kept for
-// backward compatibility only. New code should use crypt.Seal.
+// ExampleEncryptCBC demonstrates AES-CBC encryption — useful for
+// interop with existing AES-CBC systems (PHP, Java, Python). Pair
+// with HMAC if you need authentication, or use Seal for built-in
+// authenticated encryption.
 func ExampleEncryptCBC() {
 	key := []byte("01234567890123456789012345678901")
-	ct, err := crypt.EncryptCBC(key, []byte("legacy"))
+	ct, err := crypt.EncryptCBC(key, []byte("payload"))
 	if err != nil {
 		panic(err)
 	}
@@ -206,7 +208,7 @@ func ExampleEncryptCBC() {
 		panic(err)
 	}
 	fmt.Println(string(pt))
-	// Output: legacy
+	// Output: payload
 }
 
 // ExampleSealer_Seal_aad shows binding ciphertext to a context, with

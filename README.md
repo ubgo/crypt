@@ -129,7 +129,7 @@ The last one is not theoretical: a hand-rolled wrapper in a Node.js codebase shi
 
 **Constant-time compare** — `ConstantTimeEqual`. Wraps `crypto/subtle`.
 
-**AES-CBC** — `EncryptCBC`, `DecryptCBC` (16/24/32-byte keys for AES-128/192/256). First-class peer of AES-GCM — use it when interop with an existing AES-CBC system is required (PHP/Java/Python), or when reading ciphertext your application already wrote in this format. CBC has no built-in authentication; layer HMAC on top (encrypt-then-MAC) or use `Seal/Open` if you need tamper detection. A `legacy.OpenAuto` helper auto-detects AEAD vs CBC for migration scripts.
+**AES-CBC** — `EncryptCBC`, `DecryptCBC` (16/24/32-byte keys for AES-128/192/256). First-class peer of AES-GCM — use it when interop with an existing AES-CBC system is required (PHP/Java/Python), or when reading ciphertext your application already wrote in this format. CBC has no built-in authentication; layer HMAC on top (encrypt-then-MAC) or use `Seal/Open` if you need tamper detection. A `crypt.OpenAuto` helper auto-detects AEAD vs CBC for migration scripts.
 
 **Cross-language wire format** — every AEAD and HMAC output is byte-identical to the TypeScript counterpart, validated by `testdata/vectors.json` consumed by both repos' tests.
 
@@ -166,8 +166,8 @@ func VerifyPassword(plaintext, hash string) (bool, error)
 // AES-CBC (16/24/32-byte keys; no built-in auth — pair with HMAC if needed)
 func EncryptCBC(key []byte, plaintext []byte) (string, error)
 func DecryptCBC(key []byte, ciphertext string) ([]byte, error)
-import "github.com/ubgo/crypt/legacy"
-func legacy.OpenAuto(key []byte, ciphertext string, aad []byte) ([]byte, error)
+import "github.com/ubgo/crypt"
+func crypt.OpenAuto(key []byte, ciphertext string, aad []byte) ([]byte, error)
 
 // ChaCha20-Poly1305 (alternative AEAD; wire version 0x02)
 func SealChaCha20(key, plaintext, aad []byte) (string, error)
@@ -258,7 +258,7 @@ Requires Go 1.25 or later.
 
 ## Status
 
-- **v1.0.0** — frozen API. AEAD, random, sign, password, legacy CBC, migration helper.
+- **v1.0.0** — frozen API. AEAD, random, sign, password, AES-CBC, migration helper.
 - **v1.1+** — additive features per [`FEATURES.md`](https://github.com/ubgo/crypt/blob/main/FEATURES.md): HKDF helper, multi-key `KeyRing` for rotation, ChaCha20-Poly1305 for non-AES-NI hardware. No breaking changes.
 - **v2.0** — KMS adapter interface, asymmetric primitives (X25519, Ed25519). Roadmap.
 

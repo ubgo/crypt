@@ -9,8 +9,8 @@
 //
 // In a real migration you would:
 //
-//   - Use github.com/ubgo/crypt/legacy.OpenAuto if some rows might
-//     already be AEAD (idempotent re-runs).
+//   - Use crypt.OpenAuto if some rows might already be AEAD
+//     (idempotent re-runs).
 //   - Run inside a transaction, batch updates, log row-by-row.
 //   - Run during low traffic / off-hours.
 //   - Keep a backup before starting.
@@ -23,7 +23,6 @@ import (
 	"log"
 
 	"github.com/ubgo/crypt"
-	"github.com/ubgo/crypt/legacy"
 )
 
 // fakeDB is a stand-in for a real table.
@@ -61,7 +60,7 @@ func main() {
 	migrated, skipped, errored := 0, 0, 0
 	for id, oldCt := range db.rows {
 		// Decrypt regardless of format.
-		plain, err := legacy.OpenAuto(key, oldCt, nil)
+		plain, err := crypt.OpenAuto(key, oldCt, nil)
 		if err != nil {
 			fmt.Printf("  %s: decrypt error: %v\n", id, err)
 			errored++

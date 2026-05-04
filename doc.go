@@ -34,11 +34,13 @@
 //
 // Legacy (AES-CBC, deprecated):
 //   - [EncryptCBC] / [DecryptCBC]
-//   - The package-level [EncryptWithKey] / [DecryptWithKey] / [Cipher]
-//     are also CBC-based and Deprecated.
+//   - The v0.x string-typed wrappers [EncryptWithKey] / [DecryptWithKey]
+//     and [Cipher] / [New] are kept Deprecated; use the byte-typed
+//     EncryptCBC/DecryptCBC instead.
 //
-// Migration helper:
-//   - github.com/ubgo/crypt/legacy.OpenAuto detects format and dispatches.
+// Format auto-detect:
+//   - [OpenAuto] decrypts ciphertext that may be AEAD or AES-CBC.
+//     Useful for migration scripts and rollover-window readers.
 //
 // # Wire format
 //
@@ -86,8 +88,9 @@
 //   - The default key fallback present in earlier versions of this
 //     package is removed. AEAD operations require an explicit 32-byte
 //     key supplied at call time.
-//   - AES-CBC has no message authentication. Code paths that read
-//     CBC ciphertext should be marked as legacy and migrated.
+//   - AES-CBC has no built-in message authentication. If you need
+//     tamper detection on CBC output, layer HMAC on top, or use
+//     Seal/Open which build it in.
 //   - Password hashing uses argon2id with parameters tuned per OWASP
 //     recommendations (m=64 MiB, t=2, p=1). Stored hashes encode
 //     parameters in PHC format, allowing future re-tuning without

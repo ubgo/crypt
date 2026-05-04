@@ -32,7 +32,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - **HMAC signing**: `Sign` (HMAC-SHA256), `Verify` (constant-time), `ConstantTimeEqual` wrapper.
 - **Random helpers**: `RandomBytes`, `RandomToken` (URL-safe base64 no-pad), `RandomHex`.
 - **AES-CBC** as a first-class peer of AES-GCM — `EncryptCBC` / `DecryptCBC` for interop with existing CBC systems (PHP/Java/Python) or reading ciphertext your application already wrote in this format. No built-in authentication; pair with HMAC if needed.
-- **Migration helper** at `legacy.OpenAuto` for transitional reads across formats.
+- **Migration helper** at `crypt.OpenAuto` for transitional reads across formats.
 - **Cross-language test vectors** at `testdata/vectors.json` shared with the TypeScript counterpart at `@ubgo/crypt`.
 - **Sentinel errors**: `ErrInvalidKey`, `ErrTampered`, `ErrUnsupportedVersion`, `ErrInvalidCiphertext`, `ErrInvalidPasswordHash`, `ErrTruncated`, `ErrExpired`, etc.
 - **Documentation**: `USAGE.md`, `SECURITY.md`, `WIRE_FORMAT.md`, `MIGRATION.md`, `RECIPES.md`, `FAQ.md`, `BENCHMARKS.md`.

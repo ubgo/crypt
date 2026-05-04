@@ -37,8 +37,8 @@ var (
 	// CBC, or otherwise malformed).
 	ErrInvalidCiphertext = errors.New("crypt: invalid ciphertext encoding")
 
-	// ErrUnknownFormat is returned by legacy.OpenAuto when it cannot
-	// detect whether the ciphertext is AEAD or legacy CBC.
+	// ErrUnknownFormat is returned by OpenAuto when it cannot detect
+	// whether the ciphertext is AES-GCM or AES-CBC.
 	ErrUnknownFormat = errors.New("crypt: unknown ciphertext format")
 
 	// ErrInvalidPasswordHash is returned when a stored password hash

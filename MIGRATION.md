@@ -71,7 +71,7 @@ There are three viable approaches. Pick per use case.
 
 ### A. Lazy re-encrypt
 
-Read with `legacy.OpenAuto` (handles both formats). On the next write to a row, write with `Seal`. Over time, the table converges to AEAD format naturally.
+Read with `crypt.OpenAuto` (handles both formats). On the next write to a row, write with `Seal`. Over time, the table converges to AEAD format naturally.
 
 **Pros:**
 - No batch script
@@ -87,7 +87,7 @@ Read with `legacy.OpenAuto` (handles both formats). On the next write to a row, 
 ```go
 import (
     "github.com/ubgo/crypt"
-    "github.com/ubgo/crypt/legacy"
+    "github.com/ubgo/crypt"
 )
 
 func (s *Service) GetSecret(ctx context.Context, id string) (string, error) {
@@ -95,7 +95,7 @@ func (s *Service) GetSecret(ctx context.Context, id string) (string, error) {
     if err != nil {
         return "", err
     }
-    plain, err := legacy.OpenAuto(s.key, row.ClientSecret, nil)
+    plain, err := crypt.OpenAuto(s.key, row.ClientSecret, nil)
     if err != nil {
         return "", err
     }
@@ -130,7 +130,7 @@ See [`examples/migrate_cbc_to_gcm/`](./examples/migrate_cbc_to_gcm) for a runnab
 ```go
 import (
     "github.com/ubgo/crypt"
-    "github.com/ubgo/crypt/legacy"
+    "github.com/ubgo/crypt"
 )
 
 func migrate(ctx context.Context, db *ent.Client, key []byte) error {
@@ -139,7 +139,7 @@ func migrate(ctx context.Context, db *ent.Client, key []byte) error {
         return err
     }
     for _, row := range rows {
-        plain, err := legacy.OpenAuto(key, row.ClientSecret, nil)
+        plain, err := crypt.OpenAuto(key, row.ClientSecret, nil)
         if err != nil {
             log.Printf("row %s: skip (%v)", row.ID, err)
             continue
@@ -209,14 +209,14 @@ For a typical "lazy + eventual" migration combining approaches A and B:
 
 ### Step 1 — Update read path
 
-Change the read path from `DecryptCBC` (or `DecryptWithKey`) to `legacy.OpenAuto`. Verify in staging that reads succeed against current production data.
+Change the read path from `DecryptCBC` (or `DecryptWithKey`) to `crypt.OpenAuto`. Verify in staging that reads succeed against current production data.
 
 ```go
 // Before
 plain, err := crypt.DecryptCBC(key, row.ClientSecret)
 
 // After
-plain, err := legacy.OpenAuto(key, row.ClientSecret, nil)
+plain, err := crypt.OpenAuto(key, row.ClientSecret, nil)
 ```
 
 Deploy. Monitor for errors. No data has changed yet.
@@ -269,7 +269,7 @@ Change the read path back from `OpenAuto` to plain `Open`.
 
 ```go
 // Before
-plain, err := legacy.OpenAuto(key, row.ClientSecret, nil)
+plain, err := crypt.OpenAuto(key, row.ClientSecret, nil)
 
 // After
 plain, err := sealer.Open(row.ClientSecret, nil)
@@ -279,10 +279,10 @@ Deploy. Monitor for `ErrUnsupportedVersion` or `ErrTampered` — if any, you mis
 
 ### Step 6 — Clean up
 
-Search for any remaining import of `github.com/ubgo/crypt/legacy` in production paths. The legacy subpackage should now appear only in migration scripts.
+Search for any remaining import of `github.com/ubgo/crypt` in production paths. The legacy subpackage should now appear only in migration scripts.
 
 ```sh
-grep -rn 'crypt/legacy' --include '*.go' . | grep -v cmd/migrate
+grep -rn 'crypt' --include '*.go' . | grep -v cmd/migrate
 ```
 
 If the table was the last consumer of `EncryptCBC`/`DecryptCBC`, consider removing those imports too.
@@ -318,7 +318,7 @@ import { aitoolsCrypt } from "~/lib/aitoolscrypt"
 const plain = aitoolsCrypt.decrypt(stored)
 
 // After (correct, supports both formats)
-import { openAuto } from "@ubgo/crypt/legacy"
+import { openAuto } from "@ubgo/crypt"
 const plain = openAuto(key, stored).toString("utf8")
 ```
 

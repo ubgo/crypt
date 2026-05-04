@@ -13,7 +13,7 @@ For runnable end-to-end programs, see [`examples/`](./examples). For the full AP
 - [HMAC signing and verification](#hmac-signing-and-verification)
 - [Constant-time comparison](#constant-time-comparison)
 - [Password hashing](#password-hashing)
-- [Reading legacy AES-CBC data](#reading-legacy-aes-cbc-data)
+- [Reading AES-CBC ciphertext](#reading-aes-cbc-ciphertext)
 - [Mixed-format reads with OpenAuto](#mixed-format-reads-with-openauto)
 - [Cross-language interop with Node.js](#cross-language-interop-with-nodejs)
 - [Testing patterns](#testing-patterns)
@@ -298,7 +298,7 @@ If you need to retrieve the original value later (API keys you display once, enc
 
 ---
 
-## Reading legacy AES-CBC data
+## Reading AES-CBC ciphertext
 
 If you have data already encrypted with `EncryptCBC` (or the deprecated `EncryptWithKey` from v0.x), decrypt with `DecryptCBC`:
 
@@ -320,14 +320,14 @@ See [MIGRATION.md](./MIGRATION.md) for the full migration playbook.
 During a migration window when some rows are AEAD and others are still CBC:
 
 ```go
-import "github.com/ubgo/crypt/legacy"
+import "github.com/ubgo/crypt"
 
-plain, err := legacy.OpenAuto(key, row.Ciphertext, nil)
+plain, err := crypt.OpenAuto(key, row.Ciphertext, nil)
 ```
 
 `OpenAuto` detects the format (base64url+0x01 → AEAD; hex → CBC) and dispatches.
 
-Treat any `import "github.com/ubgo/crypt/legacy"` line as a smell. Production reads should call `crypt.Open` directly. The `legacy` subpackage exists to make migration tooling easy to grep for and clean up post-migration.
+Treat any `import "github.com/ubgo/crypt"` line as a smell. Production reads should call `crypt.Open` directly. The `legacy` subpackage exists to make migration tooling easy to grep for and clean up post-migration.
 
 ---
 
@@ -371,7 +371,7 @@ if !crypt.Verify(serviceKey, body, sig) {
 
 - AEAD `Seal`/`Open` (round-trip and wire bytes)
 - HMAC `Sign`/`Verify`
-- Legacy CBC `EncryptCBC`/`DecryptCBC`
+- AES-CBC `EncryptCBC`/`DecryptCBC`
 
 Both repos consume the same [`testdata/vectors.json`](./testdata/vectors.json). Any change to one side that breaks parity fails CI on both.
 

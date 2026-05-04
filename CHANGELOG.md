@@ -1,44 +1,48 @@
 # Changelog
 
-All notable changes to this project are documented in this file.
+All notable changes are documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased] — v1 baseline
+## [Unreleased]
 
-### Added
+### Added — v2 features
 
-- **AEAD authenticated encryption** with AES-256-GCM via `Seal` / `Open` (package-level) and `Sealer` / `NewSealer` (bound-key form).
-- **AAD support** for binding ciphertext to a context (user ID, tenant ID, etc.).
-- **Random helpers**: `RandomBytes`, `RandomToken` (URL-safe base64 no-pad), `RandomHex`.
+- **Ed25519 signatures**: `GenerateEd25519`, `SignEd25519`, `VerifyEd25519` for asymmetric (public-key) signing.
+- **Asymmetric encryption** (sealed-box style): `GenerateKeyPair`, `SealAsymmetric`, `OpenAsymmetric` using X25519 ECDH + ChaCha20-Poly1305. Anonymous-sender semantics; sign with Ed25519 first if you need sender authentication. Wire format version 0x05.
+- **KMS adapter interface**: `KMS` interface (`GenerateDataKey`, `Decrypt`, `Encrypt`) and `EnvelopeSealer` for envelope encryption (per-row DEK wrapped under a KMS-managed KEK). Wire format version 0x06.
+- **In-memory `StaticKMS`** adapter for dev and tests.
+
+### Added — v1.2 features
+
+- **Streaming AEAD**: `SealStream` / `OpenStream` for chunked file encryption with truncation detection. Each chunk binds its position and final-flag into AAD.
+- **Time-locked tokens**: `IssueToken` / `VerifyToken` with embedded expiry. Stateless one-time tokens for password reset, email verify, magic login. Returns `ErrExpired` on expiry.
+
+### Added — v1.1 features
+
+- **HKDF key derivation**: `DeriveKey` (SHA-256) for per-tenant or per-purpose sub-keys from a master key.
+- **KeyRing for rotation**: `NewKeyRing`, `Add`, `Remove`, `SetActive`, `ActiveKid`. Wire format version 0x03 with embedded kid; old v1 ciphertexts still readable via try-each fallback.
+- **ChaCha20-Poly1305 AEAD**: `SealChaCha20` / `OpenChaCha20` for non-AES-NI hardware. Wire format version 0x02.
+- **Bcrypt password hashing**: `HashPasswordBcrypt` / `VerifyPasswordBcrypt` for compatibility with systems migrating from bcrypt. Marked `Deprecated`; new code should use argon2id `HashPassword`.
+
+### Added — v1.0 baseline
+
+- **AEAD authenticated encryption** with AES-256-GCM: `Seal`, `Open`, `Sealer`, `NewSealer`. AAD support for context binding. Wire format version 0x01.
+- **Argon2id password hashing**: `HashPassword`, `VerifyPassword` with PHC-format output.
 - **HMAC signing**: `Sign` (HMAC-SHA256), `Verify` (constant-time), `ConstantTimeEqual` wrapper.
-- **Password hashing**: `HashPassword` / `VerifyPassword` using argon2id with OWASP-recommended parameters; PHC-format string output for forward parameter compatibility.
-- **Migration helper**: `legacy.OpenAuto` in subpackage for one-shot or rollover-window reads of mixed CBC/AEAD data.
+- **Random helpers**: `RandomBytes`, `RandomToken` (URL-safe base64 no-pad), `RandomHex`.
+- **Legacy AES-CBC** support for v0.x backward compatibility. Marked `Deprecated`.
+- **Migration helper** at `legacy.OpenAuto` for transitional reads across formats.
 - **Cross-language test vectors** at `testdata/vectors.json` shared with the TypeScript counterpart at `@ubgo/crypt`.
-- **Wire format spec** at `WIRE_FORMAT.md` with byte-by-byte ciphertext layout.
-- **Sentinel errors**: `ErrInvalidKey`, `ErrTampered`, `ErrUnsupportedVersion`, `ErrInvalidCiphertext`, `ErrInvalidPasswordHash`, `ErrUnknownFormat`, plus the existing CBC errors.
-- **Runnable examples** in `examples/` covering encrypt-at-rest, webhook signing, password hashing, random tokens, AAD binding, application-wide Sealer, and CBC→GCM migration.
-- **Long-form documentation**: `USAGE.md`, `SECURITY.md`, `MIGRATION.md`, `WIRE_FORMAT.md`.
+- **Sentinel errors**: `ErrInvalidKey`, `ErrTampered`, `ErrUnsupportedVersion`, `ErrInvalidCiphertext`, `ErrInvalidPasswordHash`, `ErrTruncated`, `ErrExpired`, etc.
+- **Documentation**: `USAGE.md`, `SECURITY.md`, `WIRE_FORMAT.md`, `MIGRATION.md`, `RECIPES.md`, `FAQ.md`, `BENCHMARKS.md`.
+- **Runnable examples** in `examples/` covering encryption-at-rest, magic links, session tokens, webhook signing, encrypted cookies, CSRF tokens, key rotation, audit log integrity, file encryption, API key checks, per-tenant HKDF, cross-language interop.
 
 ### Deprecated
 
-- `EncryptCBC` / `DecryptCBC` — AES-CBC has no message authentication. Use `Seal` / `Open` for new code. Retained for backward compatibility with existing data.
-- `EncryptWithKey` / `DecryptWithKey` — wrap `EncryptCBC` / `DecryptCBC` with string types. Same Deprecated status.
+- `EncryptCBC` / `DecryptCBC` — AES-CBC has no message authentication. Use `Seal` / `Open` for new code. Retained for backward compatibility with existing v0.x data.
+- `EncryptWithKey` / `DecryptWithKey` — same Deprecated status.
 - `Cipher`, `New`, `Cipher.Encrypt`, `Cipher.Decrypt` — v0.x type-based CBC API. Same Deprecated status.
+- `HashPasswordBcrypt` / `VerifyPasswordBcrypt` — only for migrating from bcrypt-using systems.
 
-### Changed
-
-- The original `crypt.go` source file has been split into `aead.go`, `legacy_cbc.go`, `random.go`, `sign.go`, `password.go`, `errors.go`, `format.go`, `doc.go`. No public API behavior changed.
-
-## [0.0.0] — initial scaffold (pre-release)
-
-### Added
-
-- Initial implementation extracted from `lace/crypt` in boilerplate-golang (AES-CBC only).
-- Test suite under race detector with coverage targets met.
-- Taskfile, CI workflows, README, NOTICE.
-- Licensed under Apache License 2.0.
-
-[Unreleased]: https://github.com/ubgo/crypt/compare/v0.0.0...HEAD
-[0.0.0]: https://github.com/ubgo/crypt/releases/tag/v0.0.0
+[Unreleased]: https://github.com/ubgo/crypt

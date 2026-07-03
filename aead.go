@@ -142,6 +142,31 @@ func sealWithNonce(key, plaintext, aad, nonce []byte) (string, error) {
 //   - You want to inject a sealer as a service dependency for testing.
 //   - You want to bind the key into a long-lived component (plugin,
 //     service, etc.) rather than threading it through every call.
+//
+// Design choice — a Sealer is immutable and has no Rekey method.
+// The key is bound once at NewSealer and never changes. This is
+// deliberate:
+//   - Immutability is what makes a Sealer lock-free to share across
+//     goroutines; a mutable key would force a mutex or atomic.Pointer
+//     load on every Seal/Open just to serve a rare swap.
+//   - A hard key swap would instantly make all previously-sealed
+//     ciphertext undecryptable. Real rotation needs old and new keys
+//     live at once — that is [KeyRing]'s job, not a setter's.
+//
+// To rotate keys, choose by need:
+//   - Restart-free rotation with a decrypt-only grace window for old
+//     data: use [KeyRing] (writes with the active key, reads dispatch
+//     by the kid embedded in each ciphertext).
+//   - Single-key swap at a safe boundary (e.g. config reload): build a
+//     fresh Sealer and replace the pointer, guarding the shared field
+//     with sync/atomic.Pointer[Sealer] so concurrent callers stay safe.
+//     Reassigning a plain *Sealer variable under live readers is a data
+//     race.
+//
+// There is intentionally no package-level default key or global
+// SetKey. AEAD operations require an explicit key (call-time for
+// Seal/Open, construction-time for Sealer) so there is no hidden
+// mutable state, no zero-key footgun, and tests never share a key.
 type Sealer struct {
 	gcm cipher.AEAD
 }

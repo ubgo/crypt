@@ -220,6 +220,21 @@ Full reference at [pkg.go.dev](https://pkg.go.dev/github.com/ubgo/crypt).
 
 ---
 
+## Binding & rotating keys — design notes
+
+A few questions come up often enough to answer here, since the choices are deliberate.
+
+**"Can I set one global encrypt key instead of passing it everywhere?"** Use a `Sealer`, not a global. `NewSealer(key)` binds the key once at startup; downstream code then calls `sealer.Seal(pt, aad)` / `sealer.Open(ct, aad)` with no key argument. That gives you the "set once, call bare" ergonomics without a package-level default. There is intentionally no `SetDefaultKey` / `SealDefault`: a global would be hidden mutable state — hard to test (parallel tests share it), impossible to run two keys at once, and a silent zero-key footgun if used before it's set. Prefer storing the `Sealer` on your app/DI struct over hand-rolling `encryptToken(key, ...)` wrapper functions.
+
+**"Can a Sealer update its key on the fly?"** No — a `Sealer` is immutable by design and has no `Rekey` method. The key is bound at `NewSealer` and never changes, which is exactly what makes a `Sealer` safe to share across goroutines with no lock. A mutable key would force a mutex or atomic load on every `Seal`/`Open` to serve a swap that happens rarely, and a hard swap would instantly make all previously-sealed ciphertext undecryptable.
+
+**"Then how do I rotate keys?"** Pick by need:
+
+- **`KeyRing`** — restart-free rotation with a grace window. Writes use the active key; reads dispatch by the `kid` embedded in each ciphertext, so old data stays readable while it migrates. This is the right tool for compliance rotation and compromise response.
+- **Swap the whole `Sealer`** at a safe boundary (e.g. config reload) behind `atomic.Pointer[Sealer]`. Cheap and race-free, but single-key only — old ciphertext isn't readable after the swap unless you keep the old `Sealer` around. Note: reassigning a plain `*Sealer` variable while other goroutines are calling it is a data race; use `atomic.Pointer`.
+
+---
+
 ## Documentation
 
 - **[USAGE.md](./USAGE.md)** — long-form guide, every common pattern explained

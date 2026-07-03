@@ -83,6 +83,37 @@
 //	hash, _ := crypt.HashPassword(plaintext)
 //	ok, _  := crypt.VerifyPassword(plaintext, hash)
 //
+// # Key binding and rotation — design choices
+//
+// The package binds keys in exactly two ways and intentionally omits
+// a third that callers sometimes ask for.
+//
+//   - Call-time: [Seal] / [Open] take the key as an argument. Simplest;
+//     good when the key is already in hand at the call site.
+//   - Construction-time: [NewSealer] binds the key into a [Sealer] once,
+//     so downstream code calls Seal/Open with no key argument. Prefer
+//     this to writing your own encryptToken(key, ...) wrappers — it is
+//     the same "set once, call bare" ergonomics without a global.
+//
+// There is deliberately no package-level default key (no SetKey /
+// SealDefault). A global would be hidden mutable state: hard to test
+// (parallel tests share it), impossible to run two keys at once, and a
+// silent zero-key footgun if used before it is set. A [Sealer] value
+// gives the same convenience without those hazards.
+//
+// A [Sealer] is also immutable — no Rekey method. Its key never changes
+// after construction, which is what lets it be shared across goroutines
+// without a lock. To rotate keys:
+//
+//   - Use [KeyRing] for restart-free rotation. Writes use the active
+//     key; reads dispatch by the kid embedded in each ciphertext, so old
+//     data stays readable during the migration window. This is the right
+//     tool for compliance rotation and compromise response.
+//   - Or swap a whole Sealer at a safe boundary via
+//     sync/atomic.Pointer[Sealer]. Cheap and race-free, but a single
+//     key only — old ciphertext is not readable after the swap unless
+//     you keep the old Sealer around yourself.
+//
 // # Security notes
 //
 //   - The default key fallback present in earlier versions of this

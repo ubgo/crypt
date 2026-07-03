@@ -107,7 +107,11 @@ func (e *EnvelopeSealer) Open(ctx context.Context, ciphertext string, aad []byte
 		return nil, fmt.Errorf("%w: 0x%02x", ErrUnsupportedVersion, raw[0])
 	}
 	wrappedLen := binary.BigEndian.Uint32(raw[1:5])
-	if uint64(5+wrappedLen) > uint64(len(raw)) {
+	// Widen BEFORE adding: computing 5+wrappedLen in uint32 wraps for
+	// attacker-chosen wrappedLen near math.MaxUint32, sneaking past the
+	// bound check and panicking the slice below (out-of-range). Add in
+	// uint64 so the length is compared honestly.
+	if uint64(5)+uint64(wrappedLen) > uint64(len(raw)) {
 		return nil, ErrCiphertextTooShort
 	}
 	wrapped := raw[5 : 5+wrappedLen]

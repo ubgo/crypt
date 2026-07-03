@@ -2,7 +2,6 @@ package crypt
 
 import (
 	"crypto/ed25519"
-	"crypto/rand"
 	"errors"
 	"fmt"
 )
@@ -35,7 +34,7 @@ var ErrInvalidSignature = errors.New("crypt: invalid signature")
 
 // GenerateEd25519 returns a new Ed25519 keypair from the OS CSPRNG.
 func GenerateEd25519() (publicKey ed25519.PublicKey, privateKey ed25519.PrivateKey, err error) {
-	pub, priv, err := ed25519.GenerateKey(rand.Reader)
+	pub, priv, err := ed25519.GenerateKey(randReader)
 	if err != nil {
 		return nil, nil, fmt.Errorf("crypt: ed25519 keygen: %w", err)
 	}

@@ -3,7 +3,6 @@ package crypt
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/rand"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -119,7 +118,7 @@ func (r *KeyRing) SetActive(kid string) error {
 func (r *KeyRing) Seal(plaintext, aad []byte) (string, error) {
 	gcm := r.keys[r.active]
 	nonce := make([]byte, aeadNonceSize)
-	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+	if _, err := io.ReadFull(randReader, nonce); err != nil {
 		return "", fmt.Errorf("crypt: random nonce: %w", err)
 	}
 

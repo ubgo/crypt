@@ -2,7 +2,6 @@ package crypt
 
 import (
 	"crypto/cipher"
-	"crypto/rand"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -84,7 +83,7 @@ func sealChaCha20WithNonce(key, plaintext, aad, nonce []byte) (string, error) {
 
 	if nonce == nil {
 		nonce = make([]byte, aeadNonceSize)
-		if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		if _, err := io.ReadFull(randReader, nonce); err != nil {
 			return "", fmt.Errorf("crypt: random nonce: %w", err)
 		}
 	} else if len(nonce) != aeadNonceSize {

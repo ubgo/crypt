@@ -3,7 +3,6 @@ package crypt
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/rand"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -115,7 +114,7 @@ func sealWithNonce(key, plaintext, aad, nonce []byte) (string, error) {
 
 	if nonce == nil {
 		nonce = make([]byte, aeadNonceSize)
-		if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		if _, err := io.ReadFull(randReader, nonce); err != nil {
 			return "", fmt.Errorf("crypt: random nonce: %w", err)
 		}
 	} else if len(nonce) != aeadNonceSize {
@@ -194,7 +193,7 @@ func NewSealer(key []byte) (*Sealer, error) {
 // no-pad ciphertext.
 func (s *Sealer) Seal(plaintext, aad []byte) (string, error) {
 	nonce := make([]byte, aeadNonceSize)
-	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+	if _, err := io.ReadFull(randReader, nonce); err != nil {
 		return "", fmt.Errorf("crypt: random nonce: %w", err)
 	}
 	out := make([]byte, 0, aeadHeaderSize+len(plaintext)+aeadTagSize)

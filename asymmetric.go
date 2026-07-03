@@ -1,7 +1,6 @@
 package crypt
 
 import (
-	"crypto/rand"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -47,7 +46,7 @@ const (
 // SealAsymmetric / OpenAsymmetric.
 func GenerateKeyPair() (publicKey, privateKey []byte, err error) {
 	priv := make([]byte, X25519KeySize)
-	if _, err := io.ReadFull(rand.Reader, priv); err != nil {
+	if _, err := io.ReadFull(randReader, priv); err != nil {
 		return nil, nil, fmt.Errorf("crypt: x25519 keygen: %w", err)
 	}
 	pub, err := curve25519.X25519(priv, curve25519.Basepoint)
@@ -91,7 +90,7 @@ func SealAsymmetric(recipientPublicKey, plaintext []byte) (string, error) {
 	}
 
 	nonce := make([]byte, aeadNonceSize)
-	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+	if _, err := io.ReadFull(randReader, nonce); err != nil {
 		return "", fmt.Errorf("crypt: random nonce: %w", err)
 	}
 

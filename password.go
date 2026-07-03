@@ -1,7 +1,6 @@
 package crypt
 
 import (
-	"crypto/rand"
 	"crypto/subtle"
 	"encoding/base64"
 	"errors"
@@ -61,7 +60,7 @@ const (
 // Returns an error only on rare CSPRNG failure.
 func HashPassword(plaintext string) (string, error) {
 	salt := make([]byte, argonSaltLen)
-	if _, err := io.ReadFull(rand.Reader, salt); err != nil {
+	if _, err := io.ReadFull(randReader, salt); err != nil {
 		return "", fmt.Errorf("crypt: random salt: %w", err)
 	}
 

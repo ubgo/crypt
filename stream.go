@@ -3,7 +3,6 @@ package crypt
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/rand"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -82,7 +81,7 @@ func SealStream(key []byte, r io.Reader, w io.Writer, chunkSize int) error {
 	}
 
 	noncePrefix := make([]byte, streamNoncePrefix)
-	if _, err := io.ReadFull(rand.Reader, noncePrefix); err != nil {
+	if _, err := io.ReadFull(randReader, noncePrefix); err != nil {
 		return err
 	}
 

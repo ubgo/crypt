@@ -3,7 +3,6 @@ package crypt
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/rand"
 	"encoding/hex"
 	"fmt"
 	"io"
@@ -70,7 +69,7 @@ func EncryptCBC(key, plaintext []byte) (string, error) {
 
 	out := make([]byte, aes.BlockSize+len(plain))
 	iv := out[:aes.BlockSize]
-	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+	if _, err := io.ReadFull(randReader, iv); err != nil {
 		return "", fmt.Errorf("crypt: random IV: %w", err)
 	}
 

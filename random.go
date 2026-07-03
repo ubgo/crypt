@@ -8,6 +8,14 @@ import (
 	"io"
 )
 
+// randReader is the CSPRNG source for every random-byte read in this
+// package (nonces, IVs, salts, key material). It is a package var
+// solely so tests can substitute a failing reader to exercise the
+// otherwise-unreachable RNG-failure error branches. Production code
+// never reassigns it; it always points at crypto/rand.Reader. Never
+// reassign it outside tests.
+var randReader io.Reader = rand.Reader
+
 // Random helpers wrap crypto/rand with typed output formats. All
 // helpers source bytes from the operating system's CSPRNG and are
 // safe for cryptographic use (token generation, ID generation,
@@ -26,7 +34,7 @@ func RandomBytes(n int) ([]byte, error) {
 		return nil, fmt.Errorf("crypt: RandomBytes n must be positive; got %d", n)
 	}
 	buf := make([]byte, n)
-	if _, err := io.ReadFull(rand.Reader, buf); err != nil {
+	if _, err := io.ReadFull(randReader, buf); err != nil {
 		return nil, fmt.Errorf("crypt: random read: %w", err)
 	}
 	return buf, nil

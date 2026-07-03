@@ -1,0 +1,24 @@
+# crypt
+
+> A Go cryptography library: AES-256-GCM and ChaCha20-Poly1305 authenticated encryption, argon2id/bcrypt password hashing, HMAC and Ed25519 signing, HKDF key derivation, key rotation, KMS envelope encryption, streaming file encryption, and secure random — with safe defaults and byte-for-byte interop with the TypeScript counterpart crypt-ts.
+
+crypt is open source (ubgo/crypt), Apache-2.0 licensed. It is a library, not a service: it wraps the Go standard library and golang.org/x/crypto — no custom algorithms, no network calls, nothing sent anywhere.
+
+## Docs
+- [README](https://github.com/ubgo/crypt/blob/main/README.md): overview, install, usage, FAQ
+- [USAGE](https://github.com/ubgo/crypt/blob/main/USAGE.md): long-form guide, every common pattern
+- [RECIPES](https://github.com/ubgo/crypt/blob/main/RECIPES.md): short copy-pasteable snippets by task
+- [WIRE_FORMAT](https://github.com/ubgo/crypt/blob/main/WIRE_FORMAT.md): byte-by-byte ciphertext spec for cross-language interop
+- [SECURITY](https://github.com/ubgo/crypt/blob/main/SECURITY.md): threat model and disclosure policy
+- [MIGRATION](https://github.com/ubgo/crypt/blob/main/MIGRATION.md): moving from v0.x AES-CBC to AES-GCM
+- [CHANGELOG](https://github.com/ubgo/crypt/blob/main/CHANGELOG.md): release history
+- [CONTRIBUTING](https://github.com/ubgo/crypt/blob/main/CONTRIBUTING.md): how to contribute
+- [API reference](https://pkg.go.dev/github.com/ubgo/crypt): full godoc on pkg.go.dev
+
+## Install
+- `go get github.com/ubgo/crypt` (requires Go 1.25+)
+
+## Links
+- Repository: https://github.com/ubgo/crypt
+- Homepage / API docs: https://pkg.go.dev/github.com/ubgo/crypt
+- TypeScript counterpart: https://github.com/ubgo/crypt-ts

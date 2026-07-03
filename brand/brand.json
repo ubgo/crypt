@@ -1,0 +1,39 @@
+{
+  "name": "crypt",
+  "tagline": "Authenticated encryption, password hashing, and signing for Go — safe defaults, stdlib-only, with byte-for-byte TypeScript interop.",
+  "description": "crypt is a batteries-included cryptography toolkit for Go: AES-256-GCM and ChaCha20-Poly1305 authenticated encryption, argon2id/bcrypt password hashing, HMAC and Ed25519 signing, HKDF key derivation, key rotation (KeyRing), envelope encryption (KMS), streaming AEAD, and CSPRNG helpers — wrapped around the standard library with safe defaults and a versioned wire format that is byte-for-byte interoperable with the TypeScript counterpart crypt-ts.",
+  "repo": "ubgo/crypt",
+  "homepage": "https://pkg.go.dev/github.com/ubgo/crypt",
+  "language": "go",
+  "kind": "library",
+  "license": "Apache-2.0",
+  "author": {
+    "name": "khanakia",
+    "email": "khanakia@gmail.com",
+    "github": "khanakia"
+  },
+  "topics": [
+    "cryptography", "encryption", "go", "golang", "aes-gcm", "aead",
+    "chacha20-poly1305", "hmac", "argon2", "bcrypt", "ed25519", "hkdf",
+    "password-hashing", "key-rotation", "envelope-encryption", "security"
+  ],
+  "positioning": {
+    "category": "Go cryptography toolkit",
+    "audience": "Go backend engineers who need correct crypto without hand-rolling nonces, modes, and KDFs.",
+    "wedge": "Encrypt a database column (or sign a webhook) in one line, with authentication built in and the same bytes readable from a Node service.",
+    "alternatives": ["Go standard library (DIY)", "gtank/cryptopasta"],
+    "differentiators": [
+      "Authenticated by default (AES-256-GCM / ChaCha20-Poly1305) — no silent CBC-without-HMAC footguns.",
+      "Versioned wire format so new algorithms slot in without breaking decrypt of old data.",
+      "Byte-for-byte interop with the TypeScript twin crypt-ts via a shared known-answer vector file.",
+      "Batteries included: KeyRing rotation, KMS envelope encryption, streaming AEAD, argon2id/bcrypt, HKDF, Ed25519.",
+      "Zero third-party crypto — thin, auditable wrappers over the Go standard library and golang.org/x/crypto."
+    ]
+  },
+  "install": {
+    "go": "go get github.com/ubgo/crypt"
+  },
+  "khanakia": {
+    "addToApps": false
+  }
+}

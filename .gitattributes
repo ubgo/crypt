@@ -1,0 +1,25 @@
+# Normalize line endings to LF on checkin; let Git decide on checkout.
+* text=auto eol=lf
+
+# Explicitly treat Go sources and common text as text.
+*.go     text
+*.md     text
+*.txt    text
+*.json   text
+*.yml    text
+*.yaml   text
+*.sh     text eol=lf
+
+# Known-answer vectors are exact bytes — never munge.
+testdata/vectors.json text eol=lf
+
+# Binary assets (if any land here) — never diff/merge as text.
+*.png    binary
+*.jpg    binary
+*.gif    binary
+*.ico    binary
+
+# Keep tests/examples/docs out of the language stats on GitHub.
+*_test.go   linguist-language=Go
+examples/** linguist-documentation
+*.md        linguist-documentation

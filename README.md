@@ -1,6 +1,6 @@
 # crypt
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/ubgo/crypt.svg)](https://pkg.go.dev/github.com/ubgo/crypt) [![CI](https://github.com/ubgo/crypt/actions/workflows/test.yml/badge.svg)](https://github.com/ubgo/crypt/actions) [![Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
+[![Go Reference](https://pkg.go.dev/badge/github.com/ubgo/crypt.svg)](https://pkg.go.dev/github.com/ubgo/crypt) [![Go Report Card](https://goreportcard.com/badge/github.com/ubgo/crypt)](https://goreportcard.com/report/github.com/ubgo/crypt) [![test](https://github.com/ubgo/crypt/actions/workflows/test.yml/badge.svg)](https://github.com/ubgo/crypt/actions/workflows/test.yml) [![lint](https://github.com/ubgo/crypt/actions/workflows/lint.yml/badge.svg)](https://github.com/ubgo/crypt/actions/workflows/lint.yml) ![coverage](https://img.shields.io/badge/coverage-95%25-brightgreen) [![tag](https://img.shields.io/github/v/tag/ubgo/crypt?sort=semver)](https://github.com/ubgo/crypt/tags) [![license](https://img.shields.io/badge/license-Apache%202.0-blue)](./LICENSE) ![Go](https://img.shields.io/badge/go-1.25-00ADD8?logo=go)
 
 > Authenticated encryption, password hashing, webhook signing, and secure random — wrapped around the Go standard library with safe defaults and byte-for-byte interop with the TypeScript counterpart [`crypt-ts`](https://github.com/ubgo/crypt-ts).
 

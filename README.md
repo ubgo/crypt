@@ -278,7 +278,7 @@ A few questions come up often enough to answer here, since the choices are delib
 - **[examples/](./examples)** — 27 runnable end-to-end programs (sessions, magic links, CSRF, audit logs, encrypted files, key rotation, multi-tenant, ...)
 - **[SECURITY.md](./SECURITY.md)** — threat model, what's defended, what isn't
 - **[WIRE_FORMAT.md](./WIRE_FORMAT.md)** — byte-by-byte ciphertext spec for cross-language interop
-- **[MIGRATION.md](./MIGRATION.md)** — moving from v0.x AES-CBC to v1 AES-GCM
+- **[MIGRATION.md](./MIGRATION.md)** — moving from the legacy string-typed AES-CBC wrappers to AES-GCM
 - **[BENCHMARKS.md](./BENCHMARKS.md)** — real numbers and what they mean
 - **[FAQ.md](./FAQ.md)** — answers to questions you'll have
 - **[CHANGELOG.md](./CHANGELOG.md)**
@@ -303,9 +303,9 @@ Requires Go 1.25 or later.
 
 ## Status
 
-- **v1.0.0** — frozen API. AEAD, random, sign, password, AES-CBC, migration helper.
-- **v1.1+** — additive features per the [long-form guide](./USAGE.md): HKDF helper, multi-key `KeyRing` for rotation, ChaCha20-Poly1305 for non-AES-NI hardware. No breaking changes.
-- **v2.0** — KMS adapter interface, asymmetric primitives (X25519, Ed25519). Roadmap.
+**Current release: `v0.2.0`.** The entire surface documented above is implemented, tested (~95% coverage), and covered by cross-language known-answer vectors: AEAD (AES-256-GCM and ChaCha20-Poly1305), argon2id/bcrypt password hashing, HMAC and Ed25519 signing, HKDF, `KeyRing` rotation, KMS envelope encryption, streaming AEAD, time-locked tokens, and secure random.
+
+Pre-1.0, so: the **wire format is stable** and pinned by the shared vectors (ciphertext written today stays readable), but the Go API may still see small refinements before `v1.0.0`. Pin a version and check the [CHANGELOG](./CHANGELOG.md) before upgrading. See [`MIGRATION.md`](./MIGRATION.md) for moving off the legacy string-typed AES-CBC wrappers.
 
 ## Reporting vulnerabilities
 

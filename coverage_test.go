@@ -32,7 +32,7 @@ var errBoom = errors.New("coverage_test: injected failure")
 // error" branches that never fire in production.
 type failingReader struct{}
 
-func (failingReader) Read(p []byte) (int, error) { return 0, errBoom }
+func (failingReader) Read(_ []byte) (int, error) { return 0, errBoom }
 
 // partialRand yields `okBytes` bytes of real randomness, then fails.
 // Used to fail the *second* CSPRNG read in a function (e.g. the nonce

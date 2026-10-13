@@ -14,7 +14,7 @@ import (
 // otherwise-unreachable RNG-failure error branches. Production code
 // never reassigns it; it always points at crypto/rand.Reader. Never
 // reassign it outside tests.
-var randReader io.Reader = rand.Reader
+var randReader = rand.Reader
 
 // Random helpers wrap crypto/rand with typed output formats. All
 // helpers source bytes from the operating system's CSPRNG and are

@@ -1,7 +1,7 @@
 {
   "name": "crypt",
-  "tagline": "Authenticated encryption, password hashing, and signing for Go — safe defaults, stdlib-only, with byte-for-byte TypeScript interop.",
-  "description": "crypt is a batteries-included cryptography toolkit for Go: AES-256-GCM and ChaCha20-Poly1305 authenticated encryption, argon2id/bcrypt password hashing, HMAC and Ed25519 signing, HKDF key derivation, key rotation (KeyRing), envelope encryption (KMS), streaming AEAD, and CSPRNG helpers — wrapped around the standard library with safe defaults and a versioned wire format that is byte-for-byte interoperable with the TypeScript counterpart crypt-ts.",
+  "tagline": "Authenticated encryption, password hashing, and signing for Go — safe defaults, one dependency (golang.org/x/crypto), with byte-for-byte TypeScript interop.",
+  "description": "crypt is a batteries-included cryptography toolkit for Go: AES-256-GCM and ChaCha20-Poly1305 authenticated encryption, argon2id/bcrypt password hashing, HMAC and Ed25519 signing, HKDF key derivation, key rotation (KeyRing), envelope encryption (KMS), streaming AEAD, and CSPRNG helpers — wrapped around the Go standard library and golang.org/x/crypto with safe defaults and a versioned wire format that is byte-for-byte interoperable with the TypeScript counterpart crypt-ts.",
   "repo": "ubgo/crypt",
   "homepage": "https://pkg.go.dev/github.com/ubgo/crypt",
   "language": "go",
@@ -27,7 +27,7 @@
       "Versioned wire format so new algorithms slot in without breaking decrypt of old data.",
       "Byte-for-byte interop with the TypeScript twin crypt-ts via a shared known-answer vector file.",
       "Batteries included: KeyRing rotation, KMS envelope encryption, streaming AEAD, argon2id/bcrypt, HKDF, Ed25519.",
-      "Zero third-party crypto — thin, auditable wrappers over the Go standard library and golang.org/x/crypto."
+      "No custom crypto — thin, auditable wrappers over the Go standard library and golang.org/x/crypto, the only dependency (for argon2id, bcrypt, ChaCha20-Poly1305, X25519 and HKDF)."
     ]
   },
   "install": {

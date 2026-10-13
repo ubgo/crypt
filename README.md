@@ -2,7 +2,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/ubgo/crypt.svg)](https://pkg.go.dev/github.com/ubgo/crypt) [![Go Report Card](https://goreportcard.com/badge/github.com/ubgo/crypt)](https://goreportcard.com/report/github.com/ubgo/crypt) [![test](https://github.com/ubgo/crypt/actions/workflows/test.yml/badge.svg)](https://github.com/ubgo/crypt/actions/workflows/test.yml) [![lint](https://github.com/ubgo/crypt/actions/workflows/lint.yml/badge.svg)](https://github.com/ubgo/crypt/actions/workflows/lint.yml) ![coverage](https://img.shields.io/badge/coverage-95%25-brightgreen) [![tag](https://img.shields.io/github/v/tag/ubgo/crypt?sort=semver)](https://github.com/ubgo/crypt/tags) [![license](https://img.shields.io/badge/license-Apache%202.0-blue)](./LICENSE) ![Go](https://img.shields.io/badge/go-1.25-00ADD8?logo=go)
 
-> Authenticated encryption, password hashing, webhook signing, and secure random — wrapped around the Go standard library with safe defaults and byte-for-byte interop with the TypeScript counterpart [`crypt-ts`](https://github.com/ubgo/crypt-ts).
+> Authenticated encryption, password hashing, webhook signing, and secure random — wrapped around the Go standard library and `golang.org/x/crypto` with safe defaults and byte-for-byte interop with the TypeScript counterpart [`crypt-ts`](https://github.com/ubgo/crypt-ts).
 
 **crypt** is a batteries-included **Go cryptography library**: AES-256-GCM and ChaCha20-Poly1305 authenticated encryption (AEAD), argon2id and bcrypt password hashing, HMAC and Ed25519 signing, HKDF key derivation, graceful key rotation, KMS envelope encryption, streaming file encryption, and a CSPRNG-backed secure-random toolkit — all with safe defaults, a versioned wire format, and byte-for-byte interoperability with Node.js via `crypt-ts`.
 
@@ -269,7 +269,7 @@ A few questions come up often enough to answer here, since the choices are delib
 
 **Is AES-CBC deprecated?** No — it's a first-class peer kept for interop with existing AES-CBC systems and for reading ciphertext you already wrote. It has no built-in authentication, so pair it with HMAC (encrypt-then-MAC) or use `Seal`/`Open` when you need tamper detection.
 
-**What Go version does crypt need?** Go 1.25 or later; the only dependency is `golang.org/x/crypto`.
+**What Go version does crypt need?** Go 1.25 or later; the only dependency is `golang.org/x/crypto`, used for argon2id, bcrypt, ChaCha20-Poly1305, X25519 and HKDF; everything else is the standard library.
 
 ## Documentation
 

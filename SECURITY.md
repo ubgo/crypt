@@ -152,7 +152,7 @@ Please do not file public GitHub issues for security vulnerabilities.
 
 ## Audit status
 
-`crypt` v1.0 has not been independently audited. The implementation is small (under 1000 lines of code excluding tests and examples) and uses only Go standard library and `golang.org/x/crypto/argon2`. Both have been independently audited.
+`crypt` v1.0 has not been independently audited. The implementation is small (under 1000 lines of code excluding tests and examples) and uses only the Go standard library and `golang.org/x/crypto` (`argon2`, `bcrypt`, `chacha20poly1305`, `curve25519`, `hkdf`). Both have been independently audited.
 
 We welcome external review. If you have audit experience and find issues, please report via the security advisory process.
 
